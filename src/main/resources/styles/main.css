@@ -1,0 +1,23 @@
+/* main.css */
+
+.root {
+    -fx-background-color: #f4f4f4;
+    -fx-font-family: "Segoe UI", sans-serif;
+}
+
+.button {
+    -fx-background-color: linear-gradient(to bottom, #3498db, #2980b9);
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 8;
+    -fx-padding: 6 14;
+}
+
+.button:disabled {
+    -fx-background-color: #b3b3b3;
+}
+
+.label {
+    -fx-font-size: 14px;
+}
