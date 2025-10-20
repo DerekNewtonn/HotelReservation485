@@ -20,24 +20,54 @@ public class HomeWindow extends Application {
 
     @Override
     public void start(Stage stage) {
-        BorderPane root = new BorderPane();
+        stage.setTitle("Sunset Bay Resort");
 
-        // --- Background & gradient overlay
+        // --- Background & gradient
         Image bgImage = new Image(getClass().getResource("/images/hotel_background.jpg").toExternalForm());
         ImageView bgView = new ImageView(bgImage);
         bgView.setPreserveRatio(false);
 
         Region gradient = new Region();
         gradient.setStyle("""
-            -fx-background-color: linear-gradient(
-                to bottom,
-                rgba(0,0,0,0.55) 0%,
-                rgba(0,0,0,0.35) 35%,
-                rgba(0,0,0,0.75) 100%
-            );
+    -fx-background-color: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.8) 0%,
+        rgba(0,0,0,0.55) 25%,
+        rgba(0,0,0,0.75) 100%
+    );
+""");
+
+        // --- Navbar (now properly blended)
+        HBox navBar = new HBox(28);
+        navBar.setPadding(new Insets(14, 28, 14, 28));
+        navBar.setAlignment(Pos.CENTER_LEFT);
+        navBar.setStyle("""
+            -fx-background-color: transparent;
+            -fx-border-color: rgba(255,255,255,0.25);
+            -fx-border-width: 0 0 1 0;
         """);
 
-        // --- Hero content (title + tagline + review section)
+        Label logo = new Label("🏖️ Sunset Bay");
+        logo.setFont(Font.font("Georgia", 24));
+        logo.setTextFill(Color.web("#f5f5f5"));
+        logo.setStyle("-fx-cursor: hand;");
+        logo.setOnMouseClicked(e -> {
+            stage.close();
+            new HomeWindow().start(new Stage());
+        });
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Label linkRooms = navLink("Rooms", () -> new ViewRoomsWindow().show());
+        Label linkBookings = navLink("My Bookings", () -> new MyBookingsWindow().show());
+        Label linkSignIn = navLink("Sign In", () -> new LoginWindow().show());
+
+        HBox links = new HBox(22, linkRooms, linkBookings, linkSignIn);
+        links.setAlignment(Pos.CENTER_RIGHT);
+        navBar.getChildren().addAll(logo, spacer, links);
+
+        // --- Hero content
         VBox heroBox = new VBox(18);
         heroBox.setAlignment(Pos.CENTER);
         heroBox.setPadding(new Insets(40));
@@ -70,7 +100,6 @@ public class HomeWindow extends Application {
         ratingText.setStyle("-fx-text-fill: #f5f5f5; -fx-font-size: 14px;");
         reviewBox.getChildren().add(ratingText);
 
-        // 🧭 "Read More Reviews" button
         Button reviewsBtn = new Button("Read More Reviews");
         reviewsBtn.setStyle("""
             -fx-background-color: #FF9800;
@@ -80,37 +109,9 @@ public class HomeWindow extends Application {
             -fx-background-radius: 10;
             -fx-padding: 8 20 8 20;
         """);
-        reviewsBtn.setOnAction(e -> new ViewRoomsWindow().show()); // placeholder – could open a ReviewsWindow later
+        reviewsBtn.setOnAction(e -> new ViewRoomsWindow().show());
 
         heroBox.getChildren().addAll(title, subtitle, reviewBox, reviewsBtn);
-
-        StackPane centerStack = new StackPane(bgView, gradient, heroBox);
-        root.setCenter(centerStack);
-
-        // --- Navbar (high contrast)
-        HBox navBar = new HBox(28);
-        navBar.setPadding(new Insets(14, 28, 14, 28));
-        navBar.setAlignment(Pos.CENTER_LEFT);
-        navBar.setBackground(new Background(new BackgroundFill(
-                Color.rgb(0, 0, 0, 0.65), CornerRadii.EMPTY, Insets.EMPTY)));
-
-        Label logo = new Label("🏖️ Sunset Bay");
-        logo.setFont(Font.font("Georgia", 24));
-        logo.setTextFill(Color.WHITE);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        Label linkHome   = navLink("Home",   null);
-        Label linkRooms  = navLink("Rooms",  () -> new ViewRoomsWindow().show());
-        Label linkSignIn = navLink("Sign In",() -> new LoginWindow().show());
-        Label linkExit   = navLink("Exit",   stage::close);
-
-        HBox links = new HBox(22, linkHome, linkRooms, linkSignIn, linkExit);
-        links.setAlignment(Pos.CENTER_RIGHT);
-
-        navBar.getChildren().addAll(logo, spacer, links);
-        root.setTop(navBar);
 
         // --- Footer
         HBox footer = new HBox(24);
@@ -120,16 +121,25 @@ public class HomeWindow extends Application {
                 Color.rgb(0, 0, 0, 0.55), CornerRadii.EMPTY, Insets.EMPTY)));
 
         Label address = new Label("📍 Miami, FL");
-        Label phone   = new Label("☎ (305) 555-0147");
-        Label promo   = new Label("✨ Book your dream stay today!");
+        Label phone = new Label("☎ (305) 555-0147");
+        Label promo = new Label("✨ Book your dream stay today!");
         for (Label l : new Label[]{address, phone, promo}) {
             l.setTextFill(Color.WHITE);
             l.setStyle("-fx-font-size: 13px;");
         }
         footer.getChildren().addAll(address, phone, promo);
-        root.setBottom(footer);
 
-        // --- Scene bindings
+        // --- Layout hierarchy
+        BorderPane content = new BorderPane();
+        content.setTop(navBar);
+        content.setCenter(heroBox);
+        content.setBottom(footer);
+
+        // --- Stack everything so gradient affects navbar too
+        StackPane root = new StackPane(bgView, gradient, content);
+        StackPane.setAlignment(content, Pos.CENTER);
+
+        // --- Scene setup
         Scene scene = new Scene(root, 1020, 780);
         bgView.fitWidthProperty().bind(scene.widthProperty());
         bgView.fitHeightProperty().bind(scene.heightProperty());
@@ -140,9 +150,7 @@ public class HomeWindow extends Application {
         fadeIn(heroBox, 1.2);
         fadeIn(navBar, 1.0);
         fadeIn(footer, 1.0);
-        slowZoom(bgView);
 
-        stage.setTitle("Sunset Bay Resort");
         stage.setScene(scene);
         stage.show();
     }
@@ -150,10 +158,10 @@ public class HomeWindow extends Application {
     // --- Helpers
     private Label navLink(String text, Runnable onClick) {
         Label link = new Label(text);
-        link.setTextFill(Color.WHITE);
+        link.setTextFill(Color.web("#f2f2f2"));
         link.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand;");
-        link.setOnMouseEntered(e -> link.setStyle("-fx-text-fill: #f1d28a; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand;"));
-        link.setOnMouseExited(e  -> link.setStyle("-fx-text-fill: white;   -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand;"));
+        link.setOnMouseEntered(e -> link.setStyle("-fx-text-fill: #FFD580; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand;"));
+        link.setOnMouseExited(e -> link.setStyle("-fx-text-fill: #f2f2f2; -fx-font-size: 15px; -fx-font-weight: bold; -fx-cursor: hand;"));
         if (onClick != null) link.setOnMouseClicked(e -> onClick.run());
         return link;
     }
@@ -163,15 +171,6 @@ public class HomeWindow extends Application {
         ft.setFromValue(0);
         ft.setToValue(1);
         ft.play();
-    }
-
-    private void slowZoom(ImageView bg) {
-        ScaleTransition st = new ScaleTransition(Duration.seconds(24), bg);
-        st.setFromX(1.0); st.setFromY(1.0);
-        st.setToX(1.05);  st.setToY(1.05);
-        st.setCycleCount(ScaleTransition.INDEFINITE);
-        st.setAutoReverse(true);
-        st.play();
     }
 
     public static void main(String[] args) {
