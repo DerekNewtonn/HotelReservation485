@@ -21,3 +21,20 @@
 .label {
     -fx-font-size: 14px;
 }
+
+.navbar {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255,255,255,0.7);
+    -fx-border-width: 0 0 1 0;
+}
+
+.navbar-label {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.navbar-label:hover {
+    -fx-text-fill: #FFD580;
+}
