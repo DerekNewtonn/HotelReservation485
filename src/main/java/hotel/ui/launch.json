@@ -1,0 +1,17 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run JavaFX",
+      "request": "launch",
+      "mainClass": "hotel.ui.Main",
+      "classPaths": [
+        "out",
+        "lib/mysql-connector-j-9.4.0.jar"
+      ],
+      "vmArgs": "--module-path \"C:\\Users\\ashle\\Downloads\\openjfx-25_windows-x64_bin-sdk\\javafx-sdk-25\\lib\" --add-modules javafx.controls,javafx.fxml",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
